@@ -6,6 +6,10 @@ const config: KnipConfig = {
     devDependencies: 'off',
     unlisted: 'off',
   },
+  ignore: [
+    // TODO: Remove after entities, migrations and repositories are imported in database module.
+    '**/index.ts',
+  ],
 };
 
 export default config;
