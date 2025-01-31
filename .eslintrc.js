@@ -39,7 +39,7 @@ module.exports = {
         '**/*.dto.ts',
         '**/config.ts',
         '**/*.types.ts',
-        '**/*.entity.ts',
+        '**/*.schema.ts',
         '**/migrations/*.ts',
       ],
       rules: {
