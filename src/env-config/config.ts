@@ -6,4 +6,7 @@ export class EnvConfig {
 
   @IsString()
   DATABASE_URI: string;
+
+  @IsString()
+  JWT_SECRET: string;
 }
