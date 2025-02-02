@@ -7,8 +7,11 @@ const config: KnipConfig = {
     unlisted: 'off',
   },
   ignore: [
-    // TODO: Remove after entities, migrations and repositories are imported in database module.
-    '**/index.ts',
+    // TODO: Remove after these properties are imported.
+    '*index.ts',
+    '**/enums/**',
+    '**/guards/**',
+    '**/decorators/**',
   ],
 };
 
