@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Users } from './users.schema';
 import mongoose from 'mongoose';
-import { UserThemes } from '@data/enums';
+import { Themes } from '@data/enums';
 
 @Schema({
   timestamps: true,
@@ -16,8 +16,8 @@ export class UserProfiles {
   @Prop({ nullable: true })
   avatar_url: string | null;
 
-  @Prop({ type: String, default: UserThemes.LIGHT })
-  theme: UserThemes;
+  @Prop({ type: String, default: Themes.LIGHT })
+  theme: Themes;
 
   @Prop({ nullable: true })
   deleted_at: Date | null;
