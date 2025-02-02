@@ -23,4 +23,4 @@ export class UserProfiles {
   deleted_at: Date | null;
 }
 
-export const UserProfileSchema = SchemaFactory.createForClass(UserProfiles);
+export const UserProfilesSchema = SchemaFactory.createForClass(UserProfiles);
