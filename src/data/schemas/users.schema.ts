@@ -2,20 +2,21 @@ import { UserRoles } from '@data/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({
+  collection: 'users',
   timestamps: true,
 })
 export class Users {
-  @Prop({ required: true, unique: true })
+  @Prop({ type: String, required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: [String], default: [UserRoles.USER] })
+  @Prop({ type: [String], enum: UserRoles, default: [UserRoles.USER] })
   roles: UserRoles[];
 
-  @Prop({ nullable: true })
-  deleted_at: Date | null;
+  @Prop({ type: Date, nullable: true })
+  deletedAt: Date | null;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(Users);

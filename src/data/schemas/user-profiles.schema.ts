@@ -4,23 +4,24 @@ import mongoose from 'mongoose';
 import { Themes } from '@data/enums';
 
 @Schema({
+  collection: 'userProfiles',
   timestamps: true,
 })
 export class UserProfiles {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true })
-  user_id: Users;
+  userId: Users;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ nullable: true })
-  avatar_url: string | null;
+  @Prop({ type: String, nullable: true })
+  avatarUrl: string | null;
 
   @Prop({ type: String, default: Themes.LIGHT })
   theme: Themes;
 
-  @Prop({ nullable: true })
-  deleted_at: Date | null;
+  @Prop({ type: Date, nullable: true })
+  deletedAt: Date | null;
 }
 
 export const UserProfilesSchema = SchemaFactory.createForClass(UserProfiles);
