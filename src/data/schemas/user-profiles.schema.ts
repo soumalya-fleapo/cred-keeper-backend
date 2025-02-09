@@ -1,15 +1,20 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Users } from './users.schema';
-import mongoose from 'mongoose';
 import { Themes } from '@data/enums';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
+import { User } from './users.schema';
 
 @Schema({
   collection: 'userProfiles',
+  versionKey: false,
   timestamps: true,
 })
-export class UserProfiles {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true })
-  userId: Users;
+export class UserProfile {
+  @Prop({
+    type: Types.ObjectId,
+    ref: User.name,
+    required: true,
+  })
+  user: User;
 
   @Prop({ type: String, required: true })
   name: string;
@@ -20,8 +25,8 @@ export class UserProfiles {
   @Prop({ type: String, default: Themes.LIGHT })
   theme: Themes;
 
-  @Prop({ type: Date, nullable: true })
+  @Prop({ type: Date, nullable: true, default: null })
   deletedAt: Date | null;
 }
 
-export const UserProfilesSchema = SchemaFactory.createForClass(UserProfiles);
+export const UserProfilesSchema = SchemaFactory.createForClass(UserProfile);
