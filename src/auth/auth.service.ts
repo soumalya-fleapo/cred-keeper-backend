@@ -1,16 +1,18 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { JwtUser, LoginInput, LoginOk, SignupInput } from './dto';
-import { TokenType } from '@app/constants';
-import * as bcrypt from 'bcrypt';
-import { UsersModel } from '@data/models';
+import { SALT_ROUNDS, TokenType } from '@app/constants';
 import { UsersService } from '@app/users/users.service';
+import { UserRoles } from '@data/enums';
+import { UsersModel } from '@data/models';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@data/schemas';
+import * as bcrypt from 'bcrypt';
+import { Types } from 'mongoose';
+import {
+  JwtUser,
+  LoginInput,
+  LoginOutput,
+  SignupInput,
+  SignupOutput,
+} from './dto';
 
 @Injectable()
 export class AuthService {
@@ -20,54 +22,59 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  public async signup(body: SignupInput): Promise<LoginOk> {
-    if (await this.usersModel.findUserByEmail(body.email)) {
-      throw new HttpException(
-        { message: 'Email already existed.' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const user = await this.usersService.createUser(body);
+  public async signup(input: SignupInput): Promise<SignupOutput> {
+    const password = await bcrypt.hash(input.password, SALT_ROUNDS);
 
-    await this.usersService.createUserProfile({ user, body });
+    const user = await this.usersService.createUser({ ...input, password });
+    await this.usersService.createUserProfile({
+      user: user._id,
+      name: input.name,
+    });
 
-    return this.createJwt(user);
+    return {
+      accessToken: this.createJwt({
+        sub: user._id,
+        roles: user.roles,
+        type: TokenType.ACCESS_TOKEN,
+      }),
+    };
   }
 
-  public async login(body: LoginInput): Promise<LoginOk> {
-    const user = await this.validateCredentials(body);
+  public async login(input: LoginInput): Promise<LoginOutput> {
+    const user = await this.usersModel.findByEmail(input.email);
 
-    return this.createJwt(user);
+    if (!user || !(await bcrypt.compare(input.password, user.password))) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return {
+      accessToken: this.createJwt({
+        sub: user._id,
+        roles: user.roles,
+        type: TokenType.ACCESS_TOKEN,
+      }),
+    };
   }
 
   public validateToken(payload: JwtUser): JwtUser {
     if (!Object.values(TokenType).includes(payload.type)) {
       throw new UnauthorizedException();
     }
-
     return payload;
   }
-  private async validateCredentials(body: LoginInput): Promise<User> {
-    const { email, password } = body;
 
-    const user = await this.usersModel.findUserByEmail(email);
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    return user;
-  }
-
-  private createJwt(user: User): LoginOk {
-    const payload = {
-      sub: user._id.toString(),
-      type: TokenType.ACCESS_TOKEN,
-      roles: user.roles,
+  private createJwt(input: {
+    type: TokenType;
+    roles: UserRoles[];
+    sub: Types.ObjectId;
+  }): string {
+    const expiresInMap = {
+      [TokenType.ACCESS_TOKEN]: '30d',
     };
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(
+      { ...input, jti: new Types.ObjectId() },
+      { expiresIn: expiresInMap[input.type] },
+    );
   }
 }

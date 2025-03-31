@@ -13,6 +13,7 @@ export class UserProfile {
     type: Types.ObjectId,
     ref: User.name,
     required: true,
+    unique: true,
   })
   user: User;
 
